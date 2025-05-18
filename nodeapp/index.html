@@ -216,32 +216,32 @@
 
       //  body 
       for (let i = 0; i < bodyIDs.length; i++) {
-  const id = bodyIDs[i]; 
-  if (!data[id]) continue;
-  if (id === "id10" && !showId10) continue;
+        const id = bodyIDs[i];
+        if (!data[id]) continue;
+        if (id === "id10" && !showId10) continue;
 
-  const [x, y] = data[id];
-  const [cx, cy] = toCanvasCoords(x, y, zoom);
+        const [x, y] = data[id];
+        const [cx, cy] = toCanvasCoords(x, y, zoom);
 
-  ctx.beginPath();
-  const radius = (id === "id10") ? bodyRadius * 1.2 : bodyRadius;
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.fillStyle = colors[id] || "white";
-  ctx.fill();
+        ctx.beginPath();
+        const radius = (id === "id10") ? bodyRadius * 1.2 : bodyRadius;
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fillStyle = colors[id] || "white";
+        ctx.fill();
 
-  if (id === "id10") {
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#ffa500";
-    ctx.stroke();
-  }
+        if (id === "id10") {
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "#ffa500";
+          ctx.stroke();
+        }
 
-  // body number
-  ctx.fillStyle = "#000000";
-  ctx.font = `${Math.floor(bodyRadius * 1.4)}px sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(i.toString(), cx, cy);
-}
+        // body number
+        ctx.fillStyle = "#000000";
+        ctx.font = `${Math.floor(bodyRadius * 1.4)}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(i.toString(), cx, cy);
+      }
 
       //  axis cross 
       const [cx, cy] = toCanvasCoords(0, 0, zoom);
