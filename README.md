@@ -1,3 +1,5 @@
+![](logo.jpg)
+
 # Gravity extension for Pure Data
 Create random curves from up to 10 bodies and 1 black hole in a gravitational system.
 
