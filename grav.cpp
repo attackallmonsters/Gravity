@@ -169,7 +169,7 @@ void grav_speed(t_grav *x, t_floatarg val)
 {
     if (val < 0.0f || val > 1.0f)
     {
-        pd_error(x, "[g] speed must be in range [0.0, 1.0], got %.3f", val);
+        pd_error(x, "[grav] speed must be in range [0.0, 1.0], got %.3f", val);
         return;
     }
 
@@ -181,7 +181,7 @@ void grav_scale(t_grav *x, t_floatarg val)
 {
     if (val < 1.0f || val > 100.0f)
     {
-        pd_error(x, "[g] scale must be in range [1.0, 100.0], got %.3f", val);
+        pd_error(x, "[grav] scale must be in range [1.0, 100.0], got %.3f", val);
         return;
     }
 
@@ -193,7 +193,7 @@ void grav_limits(t_grav *x, t_floatarg val)
 {
     if (val < 0.0f || val > 1.0f)
     {
-        pd_error(x, "[g] limits must be in range [0.0, 1.0], got %.3f", val);
+        pd_error(x, "[grav] limits must be in range [0.0, 1.0], got %.3f", val);
         return;
     }
 
@@ -221,7 +221,7 @@ void grav_count(t_grav *x, t_floatarg val) { x->system->setBodyCount(static_cast
 // Prints simulation parameters and states to PD console
 void grav_dump(t_grav *x)
 {
-    post("[g] --- Parameters ---");
+    post("[grav] --- Parameters ---");
     post("dt = %f", x->system->getDt());
     post("G = %f", x->system->getG());
     post("pos_damping = %f", x->system->getPosDamping());
@@ -231,22 +231,22 @@ void grav_dump(t_grav *x)
     post("speed = %.3f", static_cast<float>(x->internal_steps) / 50.0f);
     post("limits = %.3f", static_cast<float>(x->limits == 0 ? 0 : 1));
 
-    post("[g] --- Initial body values ---");
+    post("[grav] --- Initial body values ---");
     for (int i = 0; i < x->system->BodyCount; ++i)
     {
         const Body &b = x->system->getInitBody(i);
-        post("[g] >>> body[%d]: x:%.3f y:%.3f vx:%.3f vy:%.3f m:%.3f", i, b.x, b.y, b.vx, b.vy, b.mass);
+        post("[grav] >>> body[%d]: x:%.3f y:%.3f vx:%.3f vy:%.3f m:%.3f", i, b.x, b.y, b.vx, b.vy, b.mass);
     }
 
-    post("[g] --- Current body values ---");
+    post("[grav] --- Current body values ---");
     for (int i = 0; i < x->system->BodyCount; ++i)
     {
         const Body &b = x->system->getBody(i);
-        post("[g] >>> body[%d]: x:%.3f y:%.3f vx:%.3f vy:%.3f ax:%.3f ay:%.3f m:%.3f", i, b.x, b.y, b.vx, b.vy, b.ax, b.ay, b.mass);
+        post("[grav] >>> body[%d]: x:%.3f y:%.3f vx:%.3f vy:%.3f ax:%.3f ay:%.3f m:%.3f", i, b.x, b.y, b.vx, b.vy, b.ax, b.ay, b.mass);
     }
     const Body &hole = x->system->getBlackHole();
-    post("[g] --- Current black hole values ---");
-    post("[g] >>> x:%f y:%f mass:%f", hole.x, hole.y, hole.mass);
+    post("[grav] --- Current black hole values ---");
+    post("[grav] >>> x:%f y:%f mass:%f", hole.x, hole.y, hole.mass);
 }
 
 // Set individual body parameters from message: [body index x y vx vy mass(

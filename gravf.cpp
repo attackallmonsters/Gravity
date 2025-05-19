@@ -1,6 +1,6 @@
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-// ganalyse.cpp
-// Pure Data external for analyzing positional data from [g]
+// graff.cpp
+// Pure Data external for analyzing positional data from [grav]
 // Mode-based output: distance, angle, etc.
 
 #include "m_pd.h"
@@ -51,7 +51,7 @@ void calcDistance(t_gravf *x, int argc, t_atom *argv)
 {
     if (argc < 4)
     {
-        pd_error(x, "ganalyse: invalid parameters for distance calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
+        pd_error(x, "[gravf] invalid parameters for distance calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
         return;
     }
 
@@ -69,7 +69,7 @@ void calcAngle(t_gravf *x, int argc, t_atom *argv)
 {
     if (argc < 4)
     {
-        pd_error(x, "ganalyse: invalid parameters for angle calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
+        pd_error(x, "[gravf] invalid parameters for angle calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
         return;
     }
 
@@ -87,7 +87,7 @@ void calcRelativeV(t_gravf *x, int argc, t_atom *argv)
 {
     if (argc < 4)
     {
-        pd_error(x, "ganalyse: invalid parameters for angle calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
+        pd_error(x, "[gravf] invalid parameters for angle calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
         return;
     }
 
@@ -107,7 +107,7 @@ void calcApproach(t_gravf *x, int argc, t_atom *argv)
 {
     if (argc < 8)
     {
-        pd_error(x, "ganalyse: invalid parameters for approach rate calculation: expecting [body1.x, body1.y, body1.vx, body1.vy, body2.x, body2.y, body2.vx, body2.vy(");
+        pd_error(x, "[gravf] invalid parameters for approach rate calculation: expecting [body1.x, body1.y, body1.vx, body1.vy, body2.x, body2.y, body2.vx, body2.vy(");
         return;
     }
 
@@ -134,7 +134,7 @@ void calcCenter(t_gravf *x, int argc, t_atom *argv)
 {
     if (argc < 4)
     {
-        pd_error(x, "ganalyse: invalid parameters for center calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
+        pd_error(x, "[gravf] invalid parameters for center calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
         return;
     }
 
@@ -154,7 +154,7 @@ void calcInZone(t_gravf *x, int argc, t_atom *argv)
 {
     if (argc < 4)
     {
-        pd_error(x, "ganalyse: invalid parameters for zone calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
+        pd_error(x, "[gravf] invalid parameters for zone calculation: expecting [body1.x, body1.y, body2.x, body2.y(");
         return;
     }
 
@@ -196,7 +196,7 @@ void *gravf_new([[maybe_unused]] t_symbol *s, int argc, t_atom *argv)
         mode = argv[0].a_w.w_symbol;
     else
     {
-        pd_error(x, "ganalyse: invalid or missing method name: expecting distance, angle, relativev, approach, center, inzone");
+        pd_error(x, "[gravf] invalid or missing method name: expecting distance, angle, relativev, approach, center, inzone");
         return (void *)x;
     }
 
@@ -228,7 +228,7 @@ void *gravf_new([[maybe_unused]] t_symbol *s, int argc, t_atom *argv)
     else
     {
         x->func = calcdefault;
-        pd_error(x, "ganalyse: unknown analysis function '%s': expecting distance, angle, relativev, approach, center, inzone", mode->s_name);
+        pd_error(x, "[gravf] unknown analysis function '%s': expecting distance, angle, relativev, approach, center, inzone", mode->s_name);
     }
 
     x->x_out = outlet_new(&x->x_obj, &s_list);
