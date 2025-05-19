@@ -130,9 +130,9 @@ void Gravity::setVmin(float v)
 // Set the maximal velocity
 void Gravity::setVmax(float v)
 {
-    if (v < 1.0f || v > 5.0f)
+    if (v < 1.0f || v > 100.0f)
     {
-        pd_error(grav_class, "[grav] vmax must be in (1.0, 5.0], got %f", v);
+        pd_error(grav_class, "[grav] vmax must be in (1.0, 100.0], got %f", v);
         return;
     }
 
@@ -176,15 +176,15 @@ void Gravity::setBodyMass(int index, float mass)
 // Sets position and mass for the black hole
 void Gravity::setBlackHole(float x, float y, float mass)
 {
-    if (x < -100 || x > 100)
+    if (x < -500 || x > 500)
     {
-        pd_error(grav_class, "[grav] black hole x must be between -50 and 50, got %f", x);
+        pd_error(grav_class, "[grav] black hole x must be between -500 and 500, got %f", x);
         return;
     }
 
-    if (y < -100 || y > 100)
+    if (y < -500 || y > 500)
     {
-        pd_error(grav_class, "[grav] black hole y must be between -50 and 50, got %f", y);
+        pd_error(grav_class, "[grav] black hole y must be between -500 and 500, got %f", y);
         return;
     }
 
