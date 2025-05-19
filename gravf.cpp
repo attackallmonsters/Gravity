@@ -1,5 +1,5 @@
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-// graff.cpp
+// gravf.cpp
 // Pure Data external for analyzing positional data from [grav]
 // Mode-based output: distance, angle, etc.
 
