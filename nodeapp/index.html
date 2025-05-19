@@ -50,8 +50,8 @@
 
   <div class="controls" style="margin-top: 3rem;">
     <label for="zoom">Zoom:</label>
-    <input type="range" id="zoom" min="0.1" max="1200" step="1" value="300">
-    <span id="zoomValue">300</span>
+    <input type="range" id="zoom" min="0.1" max="10000" step="1" value="200">
+    <span id="zoomValue">200</span>
 
     <label for="trail">Trail:</label>
     <input type="range" id="trail" min="0" max="10000" step="100" value="0">
@@ -254,6 +254,22 @@
       ctx.lineTo(cx, y1 + height);
       ctx.stroke();
 
+      // draw user-defined radius circle if value 23 exists
+      const radiusValue = data["radius"];
+      if (typeof radiusValue === "number" && !isNaN(radiusValue) && radiusValue > 0.1) {
+        const [centerX, centerY] = toCanvasCoords(0, 0, zoom);
+        const scale = canvas.width / (zoom * 2);
+        const radiusCanvas = radiusValue * scale;
+
+        if (radiusCanvas > 1) {
+          ctx.beginPath();
+          ctx.strokeStyle = "#ff555580";
+          ctx.lineWidth = 2;
+          ctx.arc(centerX, centerY, radiusCanvas, 0, Math.PI * 2);
+          ctx.stroke();          
+        }
+      }
+
       //  middle cross 
       const dpr = window.devicePixelRatio || 1;
       const centerX = canvas.width / 2 / dpr;
@@ -268,7 +284,6 @@
       ctx.lineTo(centerX, centerY + 10);
       ctx.stroke();
     }
-
 
     // periodic data fetch and redraw
     setInterval(() => {
