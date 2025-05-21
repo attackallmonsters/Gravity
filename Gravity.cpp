@@ -35,11 +35,11 @@ Gravity::~Gravity()
 // Initializes simulation parameters
 void Gravity::initParams()
 {
-    G = 1.0f;
-    dt = 0.01f;
-    pos_damping = 0.003f;
-    vel_damping = 0.005f;
-    softening = 0.1f;
+    G = 1.0;
+    dt = 0.01;
+    pos_damping = 0.003;
+    vel_damping = 0.005;
+    softening = 0.0;
     vmin = 1;
     vmax = 5;
 }
@@ -55,9 +55,9 @@ void Gravity::resetBodies()
 }
 
 // Sets the gravity constant
-void Gravity::setG(float g)
+void Gravity::setG(double g)
 {
-    if (g < 0.0f || g > 10.0f)
+    if (g < 0.0 || g > 10.0)
     {
         pd_error(grav_class, "[grav] G must be in (0.1, 10], got %f", g);
         return;
@@ -67,9 +67,9 @@ void Gravity::setG(float g)
 }
 
 // Sets the delta time between two simulations steps
-void Gravity::setDt(float dt)
+void Gravity::setDt(double dt)
 {
-    if (dt <= 0.0f || dt > 0.1f)
+    if (dt <= 0.0 || dt > 0.1)
     {
         pd_error(grav_class, "[grav] dt must be in (0.001, 0.1], got %f", dt);
         return;
@@ -78,9 +78,9 @@ void Gravity::setDt(float dt)
 }
 
 // Sets the position damping factor
-void Gravity::setPosDamping(float damp)
+void Gravity::setPosDamping(double damp)
 {
-    if (damp < 0.0f || damp > 0.1f)
+    if (damp < 0.0 || damp > 0.1)
     {
         pd_error(grav_class, "[grav] posdamp must be in [0.0, 0.1], got %f", damp);
         return;
@@ -90,9 +90,9 @@ void Gravity::setPosDamping(float damp)
 }
 
 // Sets the velocity damping factor
-void Gravity::setVelDamping(float damp)
+void Gravity::setVelDamping(double damp)
 {
-    if (damp < 0.0f || damp > 0.5f)
+    if (damp < 0.0 || damp > 0.5)
     {
         pd_error(grav_class, "[grav] veldamp must be in [0.0, 0.5], got %f", damp);
         return;
@@ -102,9 +102,9 @@ void Gravity::setVelDamping(float damp)
 }
 
 // Set base softening value to prevent singularities
-void Gravity::setSoftening(float s)
+void Gravity::setSoftening(double s)
 {
-    if (s < 0.0f || s > 5.0f)
+    if (s < 0.0 || s > 5.0)
     {
         pd_error(grav_class, "[grav] softening must be in (0.0, 5.0], got %f", s);
         return;
@@ -114,9 +114,9 @@ void Gravity::setSoftening(float s)
 }
 
 // Set the minimal velocity
-void Gravity::setVmin(float v)
+void Gravity::setVmin(double v)
 {
-    if (v < 0.1f || v > 1.0f)
+    if (v < 0.1 || v > 1.0)
     {
         pd_error(grav_class, "[grav] vmin must be in (0.1, 1.0], got %f", v);
         return;
@@ -128,9 +128,9 @@ void Gravity::setVmin(float v)
 }
 
 // Set the maximal velocity
-void Gravity::setVmax(float v)
+void Gravity::setVmax(double v)
 {
-    if (v < 1.0f || v > 100.0f)
+    if (v < 1.0 || v > 100.0)
     {
         pd_error(grav_class, "[grav] vmax must be in (1.0, 100.0], got %f", v);
         return;
@@ -155,7 +155,7 @@ void Gravity::setBodyCount(int count)
 }
 
 // Sets a bodies mass at simulation time
-void Gravity::setBodyMass(int index, float mass)
+void Gravity::setBodyMass(int index, double mass)
 {
     if (index < 0 || index > BodyCount - 1)
     {
@@ -174,7 +174,7 @@ void Gravity::setBodyMass(int index, float mass)
 }
 
 // Sets position and mass for the black hole
-void Gravity::setBlackHole(float x, float y, float mass)
+void Gravity::setBlackHole(double x, double y, double mass)
 {
     if (x < -500 || x > 500)
     {
@@ -243,12 +243,12 @@ void Gravity::initBody(int index)
     Vector v = computeAcceleration(index);
 
     // Calculate distance to origin to appy position damping
-    float pdamp = math->calcPositionDamping(body.x, body.y, pos_damping);
+    double pdamp = math->calcPositionDamping(body.x, body.y, pos_damping);
     body.ax = v.x - body.x * pdamp;
     body.ay = v.y - body.y * pdamp;
 }
 
-void Gravity::setBody(int index, float x, float y, float vx, float vy, float mass)
+void Gravity::setBody(int index, double x, double y, double vx, double vy, double mass)
 {
     // Validate index range to avoid out-of-bounds access
     if (index < 0 || index > BodyCount - 1)
@@ -299,37 +299,35 @@ const Body &Gravity::getBlackHole() const
     return blackHole;
 }
 
+// Nudges the Bodies when they got stuck
+void Gravity::nudge()
+{
+    nudge_mode = true;
+}
+
 // Computes a reduced time step when bodies get very close to each other.
 // Ensures more simulation detail during close encounters.
-float Gravity::computeAdaptiveDt() const
+double Gravity::computeAdaptiveDt() const
 {
-    float minDist = std::numeric_limits<float>::max();
+    double minDist = std::numeric_limits<double>::max();
 
     for (int i = 0; i < body_count; ++i)
     {
         for (int j = i + 1; j < body_count; ++j)
         {
-            float dist = math->calcEuclideanDistance(bodies[i].x, bodies[i].y, bodies[j].x, bodies[j].y);
+            double dist = math->calcEuclideanDistance(bodies[i].x, bodies[i].y, bodies[j].x, bodies[j].y);
             if (dist < minDist)
                 minDist = dist;
         }
     }
 
-    float scale = 0.8f + 0.8f * std::tanh(minDist * 0.8f);
+    double scale = 0.8f + 0.8f * std::tanh(minDist * 0.8);
 
-    float dampDt = dt * scale;
+    double dampDt = dt * scale;
 
-    // -nan prevention
-    if (dampDt <= 0.0f || std::isnan(dampDt))
-    {
-        return 0.01f;
-    }
-
-    return dampDt;
-    // return dt;
+    return std::max(dampDt, 0.001);
 }
 
-const float amin = 0.01f; // Minimal acceleration
 // Minimal velocity calculation
 void Gravity::applyMinSpeed()
 {
@@ -337,122 +335,54 @@ void Gravity::applyMinSpeed()
     {
         Body &body = bodies[i];
 
-        float v = math->calcSpeed(body.vx, body.vy);
-        float a = math->calcAcceleration(body.ax, body.ay);
+        // Skip near center
+        double r = math->calcRadiusFromCenter(body.x, body.y);
 
-        if (v < vmin && a < amin)
+        if (r < 100.0 * 100.0)
+        {
+            continue;
+        }
+
+        double v = math->calcSpeed(body.vx, body.vy);
+        double a = math->calcAcceleration(body.ax, body.ay);
+
+        if (v < vmin && a < 0.01f)
         {
             // Random angle in [0, 2π)
-            Vector v = math->randomImpulse(0.02f, 0.07f);
+            Vector v = math->randomImpulse(0.02, 0.07);
             body.vx += v.x;
             body.vy += v.y;
         }
     }
 }
 
-// Nudges the Bodies when they got stuck
-void Gravity::nudge()
-{
-    nudge_mode = true;
-}
-// Implementation of the ThreeBodySystem methods
-// Performs one simulation step using the Leapfrog integration method.
-// Updates positions, calculates new accelerations, and updates velocities with damping.
-void Gravity::simulate()
-{
-    float currentDt = computeAdaptiveDt();
-
-    for (int i = 0; i < body_count; ++i)
-    {
-        Body &body = bodies[i];
-        body.x += body.vx * currentDt + 0.5f * body.ax * currentDt * currentDt;
-        body.y += body.vy * currentDt + 0.5f * body.ay * currentDt * currentDt;
-    }
-
-    // Store current accelerations to be used in velocity update
-    float oldAx[body_count], oldAy[body_count];
-    for (int i = 0; i < body_count; ++i)
-    {
-        oldAx[i] = bodies[i].ax;
-        oldAy[i] = bodies[i].ay;
-    }
-
-    for (int i = 0; i < body_count; ++i)
-    {
-        Body &body = bodies[i];
-
-        // Compute new acceleration including gravitational and position damping
-        Vector v = computeAcceleration(i);
-
-        // Damping increases with distance to prevent runaway trajectories
-        float pdamp = math->calcPositionDamping(body.x, body.y, pos_damping);
-        body.ax = v.x - body.x * pdamp;
-        body.ay = v.y - body.y * pdamp;
-
-        applyCloseBodyRepulsion(i, 0.02f, 0.001f, 1.0f, 0.1f);
-    }
-
-    // new positions
-    for (int i = 0; i < body_count; ++i)
-    {
-        Body &body = bodies[i];
-
-        // Velocity update using averaged acceleration (Leapfrog step 2)
-        body.vx += 0.5f * (oldAx[i] + body.ax) * currentDt;
-        body.vy += 0.5f * (oldAy[i] + body.ay) * currentDt;
-
-        if (nudge_mode)
-        {
-            if (nudge_step == 20)
-            {
-                nudge_mode = false;
-                nudge_step = 0;
-            }
-
-            float nudge_factor = 10 * (5.0f + pos_damping);
-            Vector v = math->randomImpulse(-nudge_factor / 2, nudge_factor / 2);
-            body.vx = v.x;
-            body.vy = v.y;
-
-            nudge_step++;
-        }
-
-        // Compute velocity magnitude for dynamic velocity damping
-        float speed = math->calcSpeed(body.vx, body.vy);
-
-        // Velocity damping increases with speed to limit energy escalation
-        float vdamp = vel_damping * (1.f + speed);
-        body.vx *= 1.f - vdamp;
-        body.vy *= 1.f - vdamp;
-
-        // Clamp velocity to minimum and maximum thresholds
-        Vector v = math->clampSpeed(body.vx, body.vy, vmin, vmax);
-        body.vx = v.x;
-        body.vy = v.y;
-    }
-
-    applyMinSpeed();
-}
-
 // This helps prevent them from sticking together by applying a distance-based counter-force.
-void Gravity::applyCloseBodyRepulsion(int index, float vmin, float amin, float repel_zone, float repel_max)
+void Gravity::applyCloseBodyRepulsion(int index, double vmin, double amin, double repel_zone, double repel_max)
 {
     if (index < 0 || index >= body_count)
         return;
 
     Body &body = bodies[index];
 
+    // Skip near center
+    double r = math->calcRadiusFromCenter(body.x, body.y);
+
+    if (r < 100.0 * 100.0)
+    {
+        return;
+    }
+
     // Check if body is stagnating
-    float v = math->calcSpeed(body.vx, body.vy);
-    float acc = math->calcAcceleration(body.ax, body.ay);
+    double v = math->calcSpeed(body.vx, body.vy);
+    double acc = math->calcAcceleration(body.ax, body.ay);
 
     bool isStagnating = (v < vmin && acc < amin);
     if (!isStagnating)
         return;
 
     // Strong random impulse to break deadlocks
-    float angle = ((float)rand() / RAND_MAX) * 2.0f * M_PI;
-    float impulse = 0.02f + ((float)rand() / RAND_MAX) * 0.05f;
+    double angle = ((double)rand() / RAND_MAX) * 2.0 * M_PI;
+    double impulse = 0.02 + ((double)rand() / RAND_MAX) * 0.05;
 
     body.vx += impulse * std::cos(angle);
     body.vy += impulse * std::sin(angle);
@@ -473,21 +403,21 @@ void Gravity::applyCloseBodyRepulsion(int index, float vmin, float amin, float r
         if (std::abs(v.x) > repel_zone || std::abs(v.y) > repel_zone)
             continue;
 
-        float dist_sqr = v.x * v.x + v.y * v.y;
+        double dist_sqr = v.x * v.x + v.y * v.y;
         if (dist_sqr >= repel_zone * repel_zone)
             continue;
 
-        float dist = std::sqrt(dist_sqr) + 1e-6f;
-        float norm = 1.0f / dist;
+        double dist = std::sqrt(dist_sqr) + 1e-6;
+        double norm = 1.0 / dist;
 
-        float factor = (repel_zone - dist) / repel_zone;
-        float base_strength = repel_max * factor * factor;
+        double factor = (repel_zone - dist) / repel_zone;
+        double base_strength = repel_max * factor * factor;
 
         // Stronger jitter: ±100% of base strength
-        float jitter = ((float)rand() / RAND_MAX - 0.5f) * base_strength * 2.0f;
+        double jitter = ((double)rand() / RAND_MAX - 0.5) * base_strength * 2.0;
 
-        float fx = (base_strength + jitter) * v.x * norm;
-        float fy = (base_strength + jitter) * v.y * norm;
+        double fx = (base_strength + jitter) * v.x * norm;
+        double fy = (base_strength + jitter) * v.y * norm;
 
         body.ax -= fx;
         body.ay -= fy;
@@ -499,7 +429,7 @@ void Gravity::applyCloseBodyRepulsion(int index, float vmin, float amin, float r
 Vector Gravity::computeAcceleration(int targetIndex) const
 {
     const Body &target = bodies[targetIndex];
-    float ax = 0, ay = 0;
+    double ax = 0, ay = 0;
 
     for (int i = 0; i < body_count + 1; ++i)
     {
@@ -516,22 +446,22 @@ Vector Gravity::computeAcceleration(int targetIndex) const
         Vector v = math->calcRelativePositionVector(target.x, target.y, other.x, other.y);
 
         // Compute Euclidean distance between target and other
-        float distance = math->calcEuclideanDistance(v.x, v.y);
+        double distance = math->calcEuclideanDistance(v.x, v.y);
 
         // Apply softening to reduce numerical instability at short ranges
-        float currentSoftening = std::max(softening, distance * softening);
+        double currentSoftening = std::max(softening, distance * softening);
 
         // Compute softened squared distance for force calculation
-        float distSqr = v.x * v.x + v.y * v.y + currentSoftening * currentSoftening;
+        double distSqr = v.x * v.x + v.y * v.y + currentSoftening * currentSoftening;
 
-        if (distSqr <= 0.0f || distSqr < 0.0001f)
+        if (distSqr <= 0.0 || distSqr < 0.0001)
         {
             continue;
         }
 
         // Compute inverse distance and its cube
-        float invDist = 1.0f / std::sqrt(distSqr);
-        float invDist3 = invDist * invDist * invDist;
+        double invDist = 1.0 / std::sqrt(distSqr);
+        double invDist3 = invDist * invDist * invDist;
 
         // Accumulate gravitational acceleration components
         ax += G * other.mass * v.x * invDist3;
@@ -543,6 +473,85 @@ Vector Gravity::computeAcceleration(int targetIndex) const
     v.x = ax;
     v.y = ay;
     return v;
+}
+
+// Implementation of the ThreeBodySystem methods
+// Performs one simulation step using the Leapfrog integration method.
+// Updates positions, calculates new accelerations, and updates velocities with damping.
+void Gravity::simulate()
+{
+    double currentDt = computeAdaptiveDt();
+
+    for (int i = 0; i < body_count; ++i)
+    {
+        Body &body = bodies[i];
+        body.x += body.vx * currentDt + 0.5 * body.ax * currentDt * currentDt;
+        body.y += body.vy * currentDt + 0.5 * body.ay * currentDt * currentDt;
+    }
+
+    // Store current accelerations to be used in velocity update
+    double oldAx[body_count], oldAy[body_count];
+    for (int i = 0; i < body_count; ++i)
+    {
+        oldAx[i] = bodies[i].ax;
+        oldAy[i] = bodies[i].ay;
+    }
+
+    for (int i = 0; i < body_count; ++i)
+    {
+        Body &body = bodies[i];
+
+        // Compute new acceleration including gravitational and position damping
+        Vector v = computeAcceleration(i);
+
+        // Damping increases with distance to prevent runaway trajectories
+        double pdamp = math->calcPositionDamping(body.x, body.y, pos_damping);
+        body.ax = v.x - body.x * pdamp;
+        body.ay = v.y - body.y * pdamp;
+
+        applyCloseBodyRepulsion(i, 0.02, 0.001, 1.0, 0.1);
+    }
+
+    // new positions
+    for (int i = 0; i < body_count; ++i)
+    {
+        Body &body = bodies[i];
+
+        // Velocity update using averaged acceleration (Leapfrog step 2)
+        body.vx += 0.5 * (oldAx[i] + body.ax) * currentDt;
+        body.vy += 0.5 * (oldAy[i] + body.ay) * currentDt;
+
+        if (nudge_mode)
+        {
+            if (nudge_step == 20)
+            {
+                nudge_mode = false;
+                nudge_step = 0;
+            }
+
+            double nudge_factor = 10 * (5.0 + pos_damping);
+            Vector v = math->randomImpulse(-nudge_factor / 2, nudge_factor / 2);
+            body.vx = v.x;
+            body.vy = v.y;
+
+            nudge_step++;
+        }
+
+        // Compute velocity magnitude for dynamic velocity damping
+        double speed = math->calcSpeed(body.vx, body.vy);
+
+        // Velocity damping increases with speed to limit energy escalation
+        double vdamp = vel_damping * (1.0 + speed);
+        body.vx *= 1.0 - vdamp;
+        body.vy *= 1.0 - vdamp;
+
+        // Clamp velocity to minimum and maximum thresholds
+        Vector v = math->clampSpeed(body.vx, body.vy, vmin, vmax);
+        body.vx = v.x;
+        body.vy = v.y;
+    }
+
+    applyMinSpeed();
 }
 
 // Loads one of ten predefined body configurations and sets active body count.
@@ -559,11 +568,11 @@ void Gravity::loadPreset(int presetIndex)
     {
     case 0:
         // Simple rotating ring around massive center
-        setG(0.1f);
-        setDt(0.01f);
-        setSoftening(0.3f);
-        setPosDamping(0.02f);
-        setVelDamping(0.005f);
+        setG(0.1);
+        setDt(0.01);
+        setSoftening(0);
+        setPosDamping(0.02);
+        setVelDamping(0.005);
         setBodyCount(10);
 
         setBody(0, 50, 0, 0, 0.4, 1);
@@ -579,11 +588,11 @@ void Gravity::loadPreset(int presetIndex)
         break;
     case 1:
         // Asymmetric cluster with slow drift
-        setG(0.1f);
-        setDt(0.01f);
-        setSoftening(0.3f);
-        setPosDamping(0.02f);
-        setVelDamping(0.01f);
+        setG(0.1);
+        setDt(0.01);
+        setSoftening(0);
+        setPosDamping(0.02);
+        setVelDamping(0.01);
         setBodyCount(10);
 
         setBody(0, 50, 20, 0.1, 0.05, 1);
@@ -599,84 +608,84 @@ void Gravity::loadPreset(int presetIndex)
         break;
     case 2:
         // Spiral start with mild rotation
-        setG(0.1f);
-        setDt(0.01f);
-        setSoftening(0.3f);
-        setPosDamping(0.02f);
-        setVelDamping(0.01f);
+        setG(0.1);
+        setDt(0.01);
+        setSoftening(0);
+        setPosDamping(0.02);
+        setVelDamping(0.01);
         setBodyCount(10);
 
         for (int i = 0; i < 10; ++i)
         {
-            float angle = i * 0.6f;
-            float radius = 20.0f * i;
-            float x = std::cos(angle) * radius;
-            float y = std::sin(angle) * radius;
-            float vx = -std::sin(angle) * 0.2f;
-            float vy = std::cos(angle) * 0.2f;
-            setBody(i, x, y, vx, vy, 1.0f);
+            double angle = i * 0.6;
+            double radius = 20.0f * i;
+            double x = std::cos(angle) * radius;
+            double y = std::sin(angle) * radius;
+            double vx = -std::sin(angle) * 0.2;
+            double vy = std::cos(angle) * 0.2;
+            setBody(i, x, y, vx, vy, 1.0);
         }
         break;
     case 3:
         // Symmetrical cross
-        setG(0.3f);
-        setDt(0.008f);
-        setSoftening(0.3f);
-        setPosDamping(0.02f);
-        setVelDamping(0.01f);
+        setG(0.3);
+        setDt(0.008);
+        setSoftening(0);
+        setPosDamping(0.02);
+        setVelDamping(0.01);
         setBodyCount(10);
 
         for (int i = 0; i < 5; ++i)
         {
-            setBody(i, 0, i * 50.0f - 100.0f, 0.2f, 0, 1.0f);
-            setBody(i + 5, i * 50.0f - 100.0f, 0, 0, -0.2f, 1.0f);
+            setBody(i, 0, i * 50.0f - 100.0, 0.2, 0, 1.0);
+            setBody(i + 5, i * 50.0f - 100.0, 0, 0, -0.2, 1.0);
         }
         break;
     case 4:
         // Circular orbit with center mass
-        setG(0.1f);
-        setDt(0.02f);
-        setSoftening(0.5f);
-        setPosDamping(0.02f);
-        setVelDamping(0.002f);
+        setG(0.1);
+        setDt(0.02);
+        setSoftening(0.5);
+        setPosDamping(0.02);
+        setVelDamping(0.002);
         setBodyCount(10);
 
         for (int i = 0; i < 10; ++i)
         {
-            float angle = 2 * M_PI * i / 9.0f;
-            float x = 100.0f * std::cos(angle);
-            float y = 100.0f * std::sin(angle);
-            float vx = -std::sin(angle) * 0.5f;
-            float vy = std::cos(angle) * 0.5f;
-            setBody(i, x, y, vx, vy, 1.0f);
+            double angle = 2 * M_PI * i / 9.0;
+            double x = 100.0f * std::cos(angle);
+            double y = 100.0f * std::sin(angle);
+            double vx = -std::sin(angle) * 0.5;
+            double vy = std::cos(angle) * 0.5;
+            setBody(i, x, y, vx, vy, 1.0);
         }
-        setBody(9, 0, 0, 0, 0, 5.0f);
+        setBody(9, 0, 0, 0, 0, 5.0);
         break;
     case 5:
         // Random cluster
-        setG(0.5f);
-        setDt(0.01f);
-        setSoftening(0.4f);
-        setPosDamping(0.02f);
-        setVelDamping(0.01f);
+        setG(0.5);
+        setDt(0.01);
+        setSoftening(0.4);
+        setPosDamping(0.02);
+        setVelDamping(0.01);
         setBodyCount(BodyCount);
 
         for (int i = 0; i < BodyCount; ++i)
         {
-            float x = (rand() % 200) - 100;
-            float y = (rand() % 200) - 100;
-            float vx = ((rand() % 200) - 100) * 0.005f;
-            float vy = ((rand() % 200) - 100) * 0.005f;
-            setBody(i, x, y, vx, vy, 0.5f + (rand() % 100) * 0.01f);
+            double x = (rand() % 200) - 100;
+            double y = (rand() % 200) - 100;
+            double vx = ((rand() % 200) - 100) * 0.005;
+            double vy = ((rand() % 200) - 100) * 0.005;
+            setBody(i, x, y, vx, vy, 0.5f + (rand() % 100) * 0.01);
         }
         break;
     case 6:
         // Two binary systems plus orbiters
-        setG(0.2f);
-        setDt(0.01f);
-        setSoftening(0.3f);
-        setPosDamping(0.02f);
-        setVelDamping(0.005f);
+        setG(0.2);
+        setDt(0.01);
+        setSoftening(0);
+        setPosDamping(0.02);
+        setVelDamping(0.005);
         setBodyCount(10);
 
         setBody(0, -50, 0, 0, 0.3, 1);
@@ -692,11 +701,11 @@ void Gravity::loadPreset(int presetIndex)
         break;
     case 7:
         // Figure-eight approximation
-        setG(1.0f);
-        setDt(0.005f);
-        setSoftening(0.01f);
-        setPosDamping(0.0f);
-        setVelDamping(0.0f);
+        setG(1.0);
+        setDt(0.005);
+        setSoftening(0.01);
+        setPosDamping(0.0);
+        setVelDamping(0.0);
         setBodyCount(3);
 
         setBody(0, 0, 0, 0.347111, 0.532728, 1);
@@ -709,100 +718,100 @@ void Gravity::loadPreset(int presetIndex)
         break;
     case 8:
         // Line of increasing mass and spacing
-        setG(0.15f);
-        setDt(0.01f);
-        setSoftening(0.2f);
-        setPosDamping(0.02f);
-        setVelDamping(0.005f);
+        setG(0.15);
+        setDt(0.01);
+        setSoftening(0.2);
+        setPosDamping(0.02);
+        setVelDamping(0.005);
         setBodyCount(BodyCount);
 
         for (int i = 0; i < BodyCount; ++i)
         {
-            float x = i * 50.0f;
-            float y = 0;
-            float vx = 0;
-            float vy = (i - 5) * 0.1f;
-            float mass = 0.5f + 0.5f * i;
+            double x = i * 50.0;
+            double y = 0;
+            double vx = 0;
+            double vy = (i - 5) * 0.1;
+            double mass = 0.5f + 0.5f * i;
             setBody(i, x, y, vx, vy, mass);
         }
         break;
     case 9:
         // Radial outburst from center
-        setG(0.2f);
-        setDt(0.008f);
-        setSoftening(0.3f);
-        setPosDamping(0.02f);
-        setVelDamping(0.01f);
+        setG(0.2);
+        setDt(0.008);
+        setSoftening(0);
+        setPosDamping(0.02);
+        setVelDamping(0.01);
         setBodyCount(BodyCount);
 
         for (int i = 0; i < BodyCount; ++i)
         {
-            float angle = 2 * M_PI * i / 10.0f;
-            float vx = std::cos(angle) * 0.3f;
-            float vy = std::sin(angle) * 0.3f;
-            setBody(i, 0, 0, vx, vy, 1.0f);
+            double angle = 2 * M_PI * i / 10.0;
+            double vx = std::cos(angle) * 0.3;
+            double vy = std::sin(angle) * 0.3;
+            setBody(i, 0, 0, vx, vy, 1.0);
         }
         break;
     case 10:
         // Asymetric chaos at high speed
-        setG(0.15f);
-        setDt(0.01f);
-        setSoftening(0.05f);
-        setPosDamping(0.02f);
-        setVelDamping(0.0005f);
+        setG(0.15);
+        setDt(0.01);
+        setSoftening(0.05);
+        setPosDamping(0.02);
+        setVelDamping(0.0005);
         setBodyCount(5);
 
-        setBody(0, -120, 80, 0.9, -0.4, 1.5f);
-        setBody(1, 100, 60, -0.5, 0.6, 2.0f);
-        setBody(2, 0, -100, 0.4, 0.8, 1.2f);
-        setBody(3, 50, 50, -0.9, -0.2, 0.8f);
-        setBody(4, -70, -80, 0.6, 0.3, 1.0f);
+        setBody(0, -120, 80, 0.9, -0.4, 1.5);
+        setBody(1, 100, 60, -0.5, 0.6, 2.0);
+        setBody(2, 0, -100, 0.4, 0.8, 1.2);
+        setBody(3, 50, 50, -0.9, -0.2, 0.8);
+        setBody(4, -70, -80, 0.6, 0.3, 1.0);
         break;
     case 11:
         // Chaos cluster drift
-        setG(0.2f);
-        setDt(0.008f);
-        setSoftening(0.05f);
-        setPosDamping(0.02f);
-        setVelDamping(0.001f);
+        setG(0.2);
+        setDt(0.008);
+        setSoftening(0.05);
+        setPosDamping(0.02);
+        setVelDamping(0.001);
         setBodyCount(6);
 
-        setBody(0, -40, 20, 0.5, 0.4, 1.0f);
-        setBody(1, 30, -10, -0.6, 0.3, 1.8f);
-        setBody(2, 0, 0, 0.1, -0.5, 0.6f);
-        setBody(3, -30, -30, 0.3, 0.6, 1.2f);
-        setBody(4, 60, 10, -0.4, -0.3, 1.5f);
-        setBody(5, -50, 40, 0.7, -0.1, 0.9f);
+        setBody(0, -40, 20, 0.5, 0.4, 1.0);
+        setBody(1, 30, -10, -0.6, 0.3, 1.8);
+        setBody(2, 0, 0, 0.1, -0.5, 0.6);
+        setBody(3, -30, -30, 0.3, 0.6, 1.2);
+        setBody(4, 60, 10, -0.4, -0.3, 1.5);
+        setBody(5, -50, 40, 0.7, -0.1, 0.9);
         break;
     case 12:
         // Chaos extreme
-        setG(0.25f);
-        setDt(0.007f);
-        setSoftening(0.07f);
-        setPosDamping(0.02f);
-        setVelDamping(0.0002f);
+        setG(0.25);
+        setDt(0.007);
+        setSoftening(0.07);
+        setPosDamping(0.02);
+        setVelDamping(0.0002);
         setBodyCount(7);
 
-        setBody(0, -200, 100, 1.0, -0.3, 1.2f);
-        setBody(1, 180, 80, -0.8, 0.6, 2.1f);
-        setBody(2, 0, -90, 0.5, 0.9, 0.7f);
-        setBody(3, 60, 200, -1.1, -0.2, 1.4f);
-        setBody(4, -160, -150, 0.9, 0.4, 1.0f);
-        setBody(5, 30, -70, -0.3, -0.8, 0.8f);
-        setBody(6, 90, 0, -0.5, 0.5, 1.6f);
+        setBody(0, -200, 100, 1.0, -0.3, 1.2);
+        setBody(1, 180, 80, -0.8, 0.6, 2.1);
+        setBody(2, 0, -90, 0.5, 0.9, 0.7);
+        setBody(3, 60, 200, -1.1, -0.2, 1.4);
+        setBody(4, -160, -150, 0.9, 0.4, 1.0);
+        setBody(5, 30, -70, -0.3, -0.8, 0.8);
+        setBody(6, 90, 0, -0.5, 0.5, 1.6);
         break;
     case 13: // Chaos  – scattered triangle with tangential velocity
-        setG(0.15f);
-        setDt(0.009f);
-        setSoftening(0.05f);
-        setPosDamping(0.02f);
-        setVelDamping(0.0005f);
+        setG(0.15);
+        setDt(0.009);
+        setSoftening(0.05);
+        setPosDamping(0.02);
+        setVelDamping(0.0005);
         setBodyCount(3);
 
         // triangle
-        setBody(0, -100.0f, -50.0f, 0.65f, 0.3f, 1.2f);
-        setBody(1, 100.0f, -50.0f, -0.6f, 0.35f, 1.8f);
-        setBody(2, 0.0f, 120.0f, -0.05f, -0.7f, 2.0f);
+        setBody(0, -100.0, -50.0, 0.65, 0.3, 1.2);
+        setBody(1, 100.0, -50.0, -0.6, 0.35, 1.8);
+        setBody(2, 0.0, 120.0, -0.05, -0.7, 2.0);
         break;
     default:
         // Default: all bodies at origin, mass 0

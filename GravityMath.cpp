@@ -11,11 +11,17 @@ GravityMath::GravityMath()
 {
 }
 
-// Calulates the relative position [deltax deltay] of two positions
-Vector GravityMath::calcRelativePositionVector(float x1, float y1, float x2, float y2) const
+// Calculates the radius of a body relative to the center
+double GravityMath::calcRadiusFromCenter(double x, double y)
 {
-    float dx = x2 - x1;
-    float dy = y2 - y1;
+    return x * x + y * y;
+}
+
+// Calulates the relative position [deltax deltay] of two positions
+Vector GravityMath::calcRelativePositionVector(double x1, double y1, double x2, double y2) const
+{
+    double dx = x2 - x1;
+    double dy = y2 - y1;
 
     Vector v;
     v.x = dx;
@@ -24,54 +30,54 @@ Vector GravityMath::calcRelativePositionVector(float x1, float y1, float x2, flo
 }
 
 // Calculates the Euclidean distance of deltax, deltay
-float GravityMath::calcEuclideanDistance(float dx, float dy) const
+double GravityMath::calcEuclideanDistance(double dx, double dy) const
 {
     return std::sqrt(dx * dx + dy * dy);
 }
 
 // Calculates the Euclidean distance of two points
-float GravityMath::calcEuclideanDistance(float x1, float y1, float x2, float y2) const
+double GravityMath::calcEuclideanDistance(double x1, double y1, double x2, double y2) const
 {
     Vector v = calcRelativePositionVector(x1, y1, x2, y2);
     return calcEuclideanDistance(v.x, v.y);
 }
 
 // Computes position damping factor (based on distance from origin)
-float GravityMath::calcPositionDamping(float x, float y, float baseDamping) const
+double GravityMath::calcPositionDamping(double x, double y, double baseDamping) const
 {
-    float dist = std::sqrt(x * x + y * y);
-    return baseDamping * (1.0f + dist);
+    double dist = std::sqrt(x * x + y * y);
+    return baseDamping * (1.0 + dist);
 }
 
 // Computes velocity magnitude (speed)
-float GravityMath::calcSpeed(float vx, float vy) const
+double GravityMath::calcSpeed(double vx, double vy) const
 {
     return std::sqrt(vx * vx + vy * vy);
 }
 
 // Computes the acceleration
-float GravityMath::calcAcceleration(float ax, float ay) const
+double GravityMath::calcAcceleration(double ax, double ay) const
 {
     return std::sqrt(ax * ax + ay * ay);
 }
 
 // Generates random angle in [0, 2π)
-float GravityMath::randomAngle() const
+double GravityMath::randomAngle() const
 {
-    return static_cast<float>(rand()) / RAND_MAX * 2.0f * M_PI;
+    return static_cast<double>(rand()) / RAND_MAX * 2.0f * M_PI;
 }
 
-// Generates random float in [min, max)
-float GravityMath::randomRange(float min, float max) const
+// Generates random double in [min, max)
+double GravityMath::randomRange(double min, double max) const
 {
-    return min + static_cast<float>(rand()) / RAND_MAX * (max - min);
+    return min + static_cast<double>(rand()) / RAND_MAX * (max - min);
 }
 
 // Returns a random impulse vector (vx, vy) with random direction and strength
-Vector GravityMath::randomImpulse(float minStrength, float maxStrength) const
+Vector GravityMath::randomImpulse(double minStrength, double maxStrength) const
 {
-    float angle = randomAngle();
-    float strength = randomRange(minStrength, maxStrength);
+    double angle = randomAngle();
+    double strength = randomRange(minStrength, maxStrength);
 
     Vector v;
     v.x = strength * std::cos(angle);
@@ -80,22 +86,22 @@ Vector GravityMath::randomImpulse(float minStrength, float maxStrength) const
 }
 
 // Clamps velocity to a range [vmin, vmax]
-Vector GravityMath::clampSpeed(float vx, float vy, float vmin, float vmax) const
+Vector GravityMath::clampSpeed(double vx, double vy, double vmin, double vmax) const
 {
-    float speed = calcSpeed(vx, vy);
+    double speed = calcSpeed(vx, vy);
 
     if (speed == 0.0f)
         return {vx, vy};
 
     if (speed < vmin)
     {
-        float scale = vmin / speed;
+        double scale = vmin / speed;
         return {vx * scale, vy * scale};
     }
 
     if (speed > vmax)
     {
-        float scale = vmax / speed;
+        double scale = vmax / speed;
         return {vx * scale, vy * scale};
     }
 

@@ -10,6 +10,21 @@
 
 t_class *grav_class = nullptr;
 
+// Reads data from the simulation, fills a thread safe buffer and swaps ist for output
+static void fillSwap(t_grav *x)
+{
+    // Fill write buffer with simulation results
+    x->buffer_write = x->system->getBodies();
+    x->hole_write = x->system->getBlackHole();
+
+    // Swap write and read buffers
+    {
+        std::lock_guard<std::mutex> lock(x->swap_mutex);
+        std::swap(x->buffer_read, x->buffer_write);
+        std::swap(x->hole_read, x->hole_write);
+    }
+}
+
 // Project output values (optional transformation)
 static float project(t_grav *x, float val)
 {
@@ -34,16 +49,16 @@ static void grav_out(t_grav *x)
 
     // outlet 5
     t_atom holelist[2];
-    SETFLOAT(&holelist[0], project(x, hole.x));     // x
-    SETFLOAT(&holelist[1], project(x, hole.y));     // y
+    SETFLOAT(&holelist[0], project(x, static_cast<float>(hole.x)));     // x
+    SETFLOAT(&holelist[1], project(x, static_cast<float>(hole.y)));     // y
     outlet_list(x->out_hole, &s_list, 2, holelist); // black hole => outlet 5
 
     for (int i = 0; i < static_cast<int>(copy.size()); ++i)
     {
         const Body &body = copy[i];
 
-        float bx = project(x, body.x);
-        float by = project(x, body.y);
+        float bx = project(x, static_cast<float>(body.x));
+        float by = project(x, static_cast<float>(body.y));
 
         if (x->limits)
         {
@@ -56,20 +71,20 @@ static void grav_out(t_grav *x)
         // outlet 2
         t_atom poslist[3];
         SETFLOAT(&poslist[0], i);  // Body nr
-        SETFLOAT(&poslist[1], bx); // X
-        SETFLOAT(&poslist[2], by); // Y
+        SETFLOAT(&poslist[1], static_cast<float>(bx)); // X
+        SETFLOAT(&poslist[2], static_cast<float>(by)); // Y
 
         // outlet 3
         t_atom vellist[3];
         SETFLOAT(&vellist[0], i);                   // Body nr
-        SETFLOAT(&vellist[1], project(x, body.vx)); // Vx
-        SETFLOAT(&vellist[2], project(x, body.vy)); // Vy
+        SETFLOAT(&vellist[1], project(x, static_cast<float>(body.vx))); // Vx
+        SETFLOAT(&vellist[2], project(x, static_cast<float>(body.vy))); // Vy
 
         // outlet 4
         t_atom acclist[3];
         SETFLOAT(&acclist[0], i);                   // Body nr
-        SETFLOAT(&acclist[1], project(x, body.ax)); // Ax
-        SETFLOAT(&acclist[2], project(x, body.ay)); // Ay
+        SETFLOAT(&acclist[1], project(x, static_cast<float>(body.ax))); // Ax
+        SETFLOAT(&acclist[2], project(x, static_cast<float>(body.ay))); // Ay
 
         outlet_list(x->out_acc, &s_list, 3, acclist); // outlet 4 accelerations
         outlet_list(x->out_vel, &s_list, 3, vellist); // outlet 3 velocities
@@ -89,11 +104,11 @@ void grav_outinit(t_grav *x)
         const Body &b = x->system->getInitBody(i);
 
         SETFLOAT(&output[0], i); // Numeric body index
-        SETFLOAT(&output[1], b.x);
-        SETFLOAT(&output[2], b.y);
-        SETFLOAT(&output[3], b.vx);
-        SETFLOAT(&output[4], b.vy);
-        SETFLOAT(&output[5], b.mass);
+        SETFLOAT(&output[1], static_cast<float>(b.x));
+        SETFLOAT(&output[2], static_cast<float>(b.y));
+        SETFLOAT(&output[3], static_cast<float>(b.vx));
+        SETFLOAT(&output[4], static_cast<float>(b.vy));
+        SETFLOAT(&output[5], static_cast<float>(b.mass));
 
         // Send to params outlet 4
         outlet_list(x->out_initvalues, &s_list, 6, output);
@@ -106,39 +121,39 @@ void grav_outparams(t_grav *x)
     t_atom output;
 
     // Gravitational constant (G)
-    SETFLOAT(&output, x->system->getG());
+    SETFLOAT(&output, static_cast<float>(x->system->getG()));
     outlet_anything(x->out_params, gensym("G"), 1, &output);
 
     // Time step (dt)
-    SETFLOAT(&output, x->system->getDt());
+    SETFLOAT(&output, static_cast<float>(x->system->getDt()));
     outlet_anything(x->out_params, gensym("dt"), 1, &output);
 
     // Position damping
-    SETFLOAT(&output, x->system->getPosDamping() * 10000);
+    SETFLOAT(&output, static_cast<float>(x->system->getPosDamping()) * 10000);
     outlet_anything(x->out_params, gensym("posdamp"), 1, &output);
 
     // Velocity damping
-    SETFLOAT(&output, x->system->getVelDamping());
+    SETFLOAT(&output, static_cast<float>(x->system->getVelDamping()));
     outlet_anything(x->out_params, gensym("veldamp"), 1, &output);
 
     // Softening
-    SETFLOAT(&output, x->system->getSoftening());
+    SETFLOAT(&output, static_cast<float>(x->system->getSoftening()));
     outlet_anything(x->out_params, gensym("softening"), 1, &output);
 
     // Vmin
-    SETFLOAT(&output, x->system->getVmin());
+    SETFLOAT(&output, static_cast<float>(x->system->getVmin()));
     outlet_anything(x->out_params, gensym("vmin"), 1, &output);
 
     // Vmax
-    SETFLOAT(&output, x->system->getVmax());
+    SETFLOAT(&output, static_cast<float>(x->system->getVmax()));
     outlet_anything(x->out_params, gensym("vmax"), 1, &output);
 
     // Active bodies
-    SETFLOAT(&output, x->system->getBodyCount());
+    SETFLOAT(&output, static_cast<float>(x->system->getBodyCount()));
     outlet_anything(x->out_params, gensym("count"), 1, &output);
 
     // Speed
-    SETFLOAT(&output, static_cast<float>(x->internal_steps) / 50.0f);
+    SETFLOAT(&output, x->internal_steps / 50.0f);
     outlet_anything(x->out_params, gensym("speed"), 1, &output);
 
     // Scale
@@ -151,9 +166,9 @@ void grav_outparams(t_grav *x)
 
     Body blackHole = x->system->getBlackHole();
     t_atom args[3]; // x, y, m
-    SETFLOAT(&args[0], blackHole.x);
-    SETFLOAT(&args[1], blackHole.y);
-    SETFLOAT(&args[2], blackHole.mass);
+    SETFLOAT(&args[0], static_cast<float>(blackHole.x));
+    SETFLOAT(&args[1], static_cast<float>(blackHole.y));
+    SETFLOAT(&args[2], static_cast<float>(blackHole.mass));
     outlet_anything(x->out_params, gensym("hole"), 3, args);
 }
 
@@ -161,6 +176,9 @@ void grav_outparams(t_grav *x)
 void grav_bang(t_grav *x)
 {
     x->system->simulate();
+
+    fillSwap(x);
+
     grav_out(x);
 }
 
@@ -311,16 +329,7 @@ void simulate_thread(t_grav *x)
         for (int i = 0; i < x->internal_steps; ++i)
             x->system->simulate();
 
-        // Fill write buffer with simulation results
-        x->buffer_write = x->system->getBodies();
-        x->hole_write = x->system->getBlackHole();
-
-        // Swap write and read buffers
-        {
-            std::lock_guard<std::mutex> lock(x->swap_mutex);
-            std::swap(x->buffer_read, x->buffer_write);
-            std::swap(x->hole_read, x->hole_write);
-        }
+        fillSwap(x);
 
         grav_out(x);
 
@@ -330,13 +339,13 @@ void simulate_thread(t_grav *x)
         while (clock::now() < next_time)
         {
             std::this_thread::yield();
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(x->timestep_ms));
         }
 #else
         next_time += x->timestep_ms;
         while (GetTickCount() < next_time)
         {
-            Sleep(1); // sleep a tiny bit
+            Sleep(x->timestep_ms); // sleep a tiny bit
         }
 #endif
     }
