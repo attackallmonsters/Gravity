@@ -222,7 +222,7 @@
         if (id === "id10" && !showId10) continue;
 
         const [x, y] = data[id];
-        if (x === 0 && y === 0) continue;
+        if (x === 0 && y === 0 && id !== "id10") continue;
         const [cx, cy] = toCanvasCoords(x, y, zoom);
 
         ctx.beginPath();
