@@ -206,6 +206,7 @@
           ctx.strokeStyle = (id === "id10") ? "#ffa500" : (colors[id] || "white");
 
           trails[id].forEach(([x, y], i) => {
+            if (x === 0 && y === 0) return;
             const [cx, cy] = toCanvasCoords(x, y, zoom);
             if (i === 0) ctx.moveTo(cx, cy);
             else ctx.lineTo(cx, cy);
@@ -221,6 +222,7 @@
         if (id === "id10" && !showId10) continue;
 
         const [x, y] = data[id];
+        if (x === 0 && y === 0) continue;
         const [cx, cy] = toCanvasCoords(x, y, zoom);
 
         ctx.beginPath();

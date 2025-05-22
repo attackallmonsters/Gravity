@@ -116,9 +116,9 @@ void Gravity::setSoftening(double s)
 // Set the minimal velocity
 void Gravity::setVmin(double v)
 {
-    if (v < 0.1 || v > 1.0)
+    if (v < 0.1 || v > 1000.0)
     {
-        pd_error(grav_class, "[grav] vmin must be in (0.1, 1.0], got %f", v);
+        pd_error(grav_class, "[grav] vmin must be in (0.1, 1000.0], got %f", v);
         return;
     }
 
@@ -130,16 +130,16 @@ void Gravity::setVmin(double v)
 // Set the maximal velocity
 void Gravity::setVmax(double v)
 {
-    if (v < 1.0 || v > 100.0)
+    if (v < 1.0 || v > 10000.0)
     {
-        pd_error(grav_class, "[grav] vmax must be in (1.0, 100.0], got %f", v);
+        pd_error(grav_class, "[grav] vmax must be in (1.0, 10000.0], got %f", v);
         return;
     }
 
     vmax = v;
 
     if (vmin > v)
-        vmin = 0.0001;
+        vmin = v;
 }
 
 // Sets the number of active bodies
@@ -219,7 +219,7 @@ const Body &Gravity::getBody(int index) const
 // Returns a copy of all current body states for thread safety
 std::vector<Body> Gravity::getBodies() const
 {
-    return std::vector<Body>(bodies, bodies + body_count); // std::vector<Body>
+    return std::vector<Body>(bodies, bodies + BodyCount); // std::vector<Body>
 }
 
 // Gets the body with a given index

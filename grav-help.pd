@@ -15,7 +15,7 @@
 #X floatatom 390 140 8 0 0 0 - - - 0;
 #X obj 218 160 hsl 170 20 0 0.1 0 0 empty valveldamp Velocity_damping 10 10 0 12 #fce0c4 #000000 #000000 0 1;
 #X floatatom 390 162 8 0 0 0 - - - 0;
-#X obj 218 182 hsl 170 20 0.1 1 0 0 empty valvmin Vmin 10 10 0 12 #fce0c4 #000000 #000000 0 1;
+#X obj 218 182 hsl 170 20 0.1 10 0 0 empty valvmin Vmin 10 10 0 12 #fce0c4 #000000 #000000 0 1;
 #X floatatom 390 184 8 0 0 0 - - - 0;
 #X obj 218 204 hsl 170 20 1 100 0 0 empty valvmax Vmax 10 10 0 12 #fce0c4 #000000 #000000 0 1;
 #X floatatom 390 206 8 0 0 0 - - - 0;
@@ -110,7 +110,7 @@
 #X obj 20 42 vsl 20 170 -500 500 0 0 empty empty empty 0 -9 0 12 #fcfcfc #000000 #000000 0 1;
 #X obj 43 215 hsl 170 20 -500 500 0 0 empty empty empty -2 -10 0 12 #fcfcfc #000000 #000000 0 1;
 #N canvas 414 792 450 300 \$0screen 0;
-#X obj 80 82 bng 20 250 50 0 empty empty empty 0 -10 0 12 #fcfcfc #000000 #000000;
+#X obj 77 77 bng 21 250 50 0 empty empty empty 0 -11 0 12 #fcfcfc #000000 #000000;
 #X coords 0 -1 1 1 175 175 2 0 0;
 #X restore 40 40 pd \$0screen;
 #X obj 238 458 f \$0;
